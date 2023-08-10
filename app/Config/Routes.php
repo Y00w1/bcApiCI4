@@ -35,6 +35,7 @@ $routes->set404Override();
 // route since we don't have to scan directories.
 $routes->get('/', 'Shoe::index');
 $routes->get('shoe/(:segment)', [Shoe::class, 'get_shoe']);
+$routes->match(['get', 'post'], 'add/shoe', [Shoe::class, 'add']);
 
 $routes->get('user/register', [Register::class, 'index']);
 $routes->post('register', [Register::class, 'store']);

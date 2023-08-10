@@ -11,9 +11,6 @@ class Api extends BaseController
     public function callApi($url, $headers)
     {
         $client = new Client();
-        /*$response = $client->request('GET', $url, [
-            'headers' => $headers,
-        ]);*/
         $request = new Request('GET', $url, $headers);
         $res = $client->sendAsync($request)->wait();
         return json_decode($res->getBody(), true);
