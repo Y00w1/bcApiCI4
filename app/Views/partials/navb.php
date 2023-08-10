@@ -30,6 +30,7 @@
           <div class="flex space-x-4">
             <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
             <a href="/" class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium" aria-current="page">Shoes</a>
+            <?php if ($user != null) : ?>
             <a href="/add/shoe" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Add</a>
           </div>
         </div>
@@ -37,7 +38,7 @@
       <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
 
         <!-- Profile dropdown -->
-        <?php if ($user != null) : ?>
+        
             <div class="flex justify-end px-4 pt-4">
                 <button id="dropdownButton" data-dropdown-toggle="dropdown" class="inline-block text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-1.5" type="button">
                     <span class="sr-only">Open dropdown</span>
@@ -56,6 +57,10 @@
                 </div>
             </div>
         <?php else : ?>
+          </div>
+        </div>
+        </div>
+        <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
         <div class="flex items-center">
             <a href="/user/login" class="text-sm mr-4 text-blue-600 dark:text-blue-500 hover:underline">Login</a>
 
