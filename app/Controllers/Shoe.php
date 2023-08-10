@@ -21,7 +21,15 @@ class Shoe extends BaseController
         $this->model = model(ShoeModel::class);
     }
 
-    //saves a new shoe
+    
+    /**
+     * The function adds a shoe to the database and returns a view with a success message if the form
+     * data is processed successfully.
+     * 
+     * @return a view. If the request is not a POST request, it returns the 'shoes/add' view with the
+     * data. If the request is a POST request and the form data is successfully processed, it adds a
+     * 'success' key to the data and returns the 'main' view with the updated data.
+     */
     public function add()
     {
         helper('form');
@@ -29,11 +37,30 @@ class Shoe extends BaseController
             'title' => 'add shoe',
             'user' => session()->get('isLoggedIn') ? session()->get('user') : null,
         ];
+
         if (! $this->request->is('post')) {
-            return (view('shoes/add', $data));
+            return view('shoes/add', $data);
         }
+
+        if ($this->processFormData()) {
+            $data['success'] = true;
+        }
+
+        return view('main', $data);
+    }
+
+/**
+ * The function `processFormData()` processes form data by validating and saving the data, including an
+ * uploaded image, to a model.
+ * 
+ * @return a boolean value. It returns true if the data processing was successful, and false if either
+ * the data validation or image upload failed.
+ */
+private function processFormData()
+    {
         $image = $this->request->getFile('image');
         $post = $this->request->getPost(['name', 'price', 'description', 'quantity', 'rating_rate', 'rating_count']);
+
         if (! $this->validateData($post, [
             'name' => 'required',
             'price' => 'required',
@@ -43,35 +70,58 @@ class Shoe extends BaseController
             'rating_rate' => 'required',
             'rating_count' => 'required'
         ])) {
-            // The validation fails, so returns the form.
-            return (view('shoes/add', $data));
+            return false; // Validation failed
         }
-        if ($image->isValid() && !$image->hasMoved()) {
-            // Define the directory where you want to save the uploaded file
-            $directory = WRITEPATH . 'uploads/';
 
-            // Generate a unique name for the file
-            $newName = $image->getRandomName();
-
-            // Move the file to the specified directory with the new name
-            $image->move($directory, $newName);
-            $this->model->save([
-                'name' => $post['name'], 
-                'price' => $post['price'], 
-                'image' => $directory . $newName,
-                'description' => $post['description'], 
-                'quantity' => $post['quantity'], 
-                'rating_rate' => $post['rating_rate'], 
-                'rating_count' => $post['rating_count']
-            ]);
-        }else{
-            return (view('shoes/add', $data));
+        $imagePath = $this->uploadImage($image);
+        if (!$imagePath) {
+            return false; // Image upload failed
         }
-        $data['success'] = true;
-        //success alert
-        return view('main', $data);
+
+        $this->model->save([
+            'name' => $post['name'], 
+            'price' => $post['price'], 
+            'image' => $imagePath,
+            'description' => $post['description'], 
+            'quantity' => $post['quantity'], 
+            'rating_rate' => $post['rating_rate'], 
+            'rating_count' => $post['rating_count']
+        ]);
+
+        return true; // Data processing was successful
     }
 
+/**
+ * The function `uploadImage` takes an image file, checks if it is valid and has not been moved, and
+ * then moves it to a specified directory with a random name, returning the file path if successful.
+ * 
+ * @param image The parameter `` is expected to be an instance of the
+ * `CodeIgniter\HTTP\Files\UploadedFile` class. This class represents an uploaded file and provides
+ * methods to interact with it, such as checking if it is valid, moving it to a new location, and
+ * generating a random
+ * 
+ * @return the path of the uploaded image if the image is valid and has not been moved. If the image
+ * upload fails, it returns null.
+ */
+private function uploadImage($image)
+    {
+        if ($image->isValid() && ! $image->hasMoved()) {
+            $directory = WRITEPATH . 'uploads/';
+            $newName = $image->getRandomName();
+            $image->move($directory, $newName);
+            return $directory . $newName;
+        }
+
+        return null; // Image upload failed
+    }
+
+    /**
+     * The index function retrieves shoe data and user information to be displayed on the main view,
+     * while the get_shoe function retrieves specific shoe data to be displayed on the shoe view.
+     * 
+     * @return string The index() function returns a string, and the get_shoe() function returns a
+     * view.
+     */
     public function index(): string
     {
         $this->store();
@@ -82,7 +132,17 @@ class Shoe extends BaseController
         ];
         return view('main', $data);
     }
-    public function get_shoe($id)
+
+    /**
+     * The function retrieves a shoe from the model, prepares data for the view, and returns the shoe
+     * view with the data.
+     * 
+     * @param string $id The "id" parameter is the unique identifier of the shoe that you want to retrieve. It
+     * is used to fetch the shoe details from the model.
+     * 
+     * @return a view called 'shoes/shoe' with the data array.
+     */
+    public function get_shoe(string $id)
     {
         $shoe =$this->model->getShoes($id);
         $data = [
@@ -92,6 +152,11 @@ class Shoe extends BaseController
         ];
         return view('shoes/shoe', $data);
     }
+
+    /**
+     * The store function retrieves shoe data from an API and saves it to the model if the shoes are
+     * not already stored.
+     */
     public function store()
     {
         if (! $this->model->getShoes() ){

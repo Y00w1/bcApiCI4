@@ -12,6 +12,12 @@ class Register extends Controller
         echo view('users/register', $data);
     }
 
+    /**
+     * The above function is a PHP code snippet that handles the registration process for a user,
+     * including form validation, saving user data to the database, and setting session variables.
+     * 
+     * @return a view called 'main' with the title 'Shoes' and the user data.
+     */
     public function store()
     {
         helper(['form']);
